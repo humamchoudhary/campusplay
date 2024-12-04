@@ -1,74 +1,195 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Platform,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/constants/Colors";
+import { Forward, MessageSquare, ThumbsUp } from "lucide-react-native";
+import { router } from "expo-router";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
+function Post({ post }) {
+  const colorScheme = useColorScheme();
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
+    <ThemedView className="flex flex-col gap-4 w-full h-fit my-2">
+      <ThemedView className="flex flex-row px-4 justify-between">
+        <ThemedView className="flex flex-row gap-4 items-center">
+          <ThemedView
+            style={{ backgroundColor: Colors["light"].tint }}
+            className="w-14 h-14 rounded-full"
+          />
+          <ThemedView className="flex flex-col justify-center">
+            <ThemedText className="font-bold">{post.username}</ThemedText>
+            <ThemedText
+              className="font-extralight "
+              style={{
+                color: Colors[colorScheme ?? "light"].text + "80",
+                fontSize: 12,
+              }}
+            >
+              {post.time}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
+      </ThemedView>
+      <ThemedText className="px-4" type="defaultSemiBold">
+        {post.caption}
+      </ThemedText>
+      <ThemedView className="relative items-center justify-center">
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          src={post.image}
+          resizeMode="contain"
+          style={{
+            width: "100%", // Full screen width
+            height: undefined, // Automatically adjust height to maintain aspect ratio
+            maxHeight: 360, // Limit the height to 360px
+            aspectRatio: 16 / 9, // Optional: Maintain a specific aspect ratio
+          }}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
+        <ThemedView
+          className="border rounded-lg absolute -bottom-5 shadow-md px-4 flex w-5/6 flex-row gap-2 justify-evenly items-center"
+          style={{
+            borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "1A",
+          }}
+        >
+          <ThemedView className="flex flex-row gap-3 items-center justify-center px-5 py-2">
+            <ThumbsUp
+              color={Colors[colorScheme ?? "light"].tabIconDefault}
+              size={16}
+            />
+            <ThemedText
+              style={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+                fontSize: 12,
+              }}
+            >
+              {post.likes}
+            </ThemedText>
+          </ThemedView>
+
+          <ThemedView className="flex flex-row gap-3 items-center justify-center px-5 py-2">
+            <MessageSquare
+              color={Colors[colorScheme ?? "light"].tabIconDefault}
+              size={16}
+            />
+            <ThemedText
+              style={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+                fontSize: 12,
+              }}
+            >
+              {post.comments}
+            </ThemedText>
+          </ThemedView>
+
+          <ThemedView className="flex flex-row gap-3 items-center justify-center px-5 py-2">
+            <Forward
+              color={Colors[colorScheme ?? "light"].tabIconDefault}
+              size={16}
+            />
+            <ThemedText
+              style={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+                fontSize: 12,
+              }}
+            >
+              {post.shares}
+            </ThemedText>
+          </ThemedView>
+        </ThemedView>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </ThemedView>
   );
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default function HomeScreen() {
+  const posts = [
+    {
+      username: "Abdullah Ijaz",
+      caption: "Dummy Post",
+      likes: 10,
+      comments: 4,
+      shares: 3,
+      time: "1 day",
+      image: "https://dummyimage.com/hd1080",
+    },
+
+    {
+      username: "Abdullah Ijaz",
+      caption: "Dummy Post",
+      likes: 10,
+      comments: 4,
+      shares: 3,
+      time: "1 day",
+      image: "https://dummyimage.com/hd1080",
+    },
+    {
+      username: "Abdullah Ijaz",
+      caption: "Dummy Post",
+      likes: 10,
+      comments: 4,
+      shares: 3,
+      time: "1 day",
+      image: "https://dummyimage.com/hd1080",
+    },
+
+    {
+      username: "Abdullah Ijaz",
+      caption: "Dummy Post",
+      likes: 10,
+      comments: 4,
+      shares: 3,
+      time: "1 day",
+      image: "https://dummyimage.com/hd1080",
+    },
+    {
+      username: "Abdullah Ijaz",
+      caption: "Dummy Post",
+      likes: 10,
+      comments: 4,
+      shares: 3,
+      time: "1 day",
+      image: "https://dummyimage.com/hd1080",
+    },
+  ];
+  const paths = [
+    { name: "Matches", path: "/matches", color: "red", bg: "#FF000080" },
+    { name: "History", path: "history", color: "pink", bg: "#D0637CB3" },
+  ];
+  return (
+    <ThemedView className="flex flex-col w-full h-full">
+      <ScrollView
+        horizontal={true}
+        className="flex flex-row  my-2 px-4 w-full h-fit "
+        contentContainerStyle={{ gap: 8 }}
+      >
+        {paths.map((item, index) => {
+          return (
+            <TouchableOpacity
+              key={index}
+              activeOpacity={0.7}
+              onPress={() => {
+                router.push(item.path);
+              }}
+              className="px-4 py-2 rounded-full h-fit"
+              style={{ backgroundColor: item.bg }}
+            >
+              <ThemedText>{item.name}</ThemedText>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+      <ScrollView className="flex flex-col h-full w-full py-4">
+        <ThemedView className="flex flex-col h-full w-full gap-8 ">
+          {posts.map((item, index) => (
+            <Post key={index} post={item} />
+          ))}
+        </ThemedView>
+      </ScrollView>
+    </ThemedView>
+  );
+}
