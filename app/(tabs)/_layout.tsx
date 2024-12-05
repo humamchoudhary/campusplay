@@ -10,7 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 
 import Constants from "expo-constants";
-import { Home, UsersRound } from "lucide-react-native";
+import { Home, MessageCircle, Search, UsersRound } from "lucide-react-native";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
@@ -41,55 +41,52 @@ export default function TabLayout() {
     },
   ];
   return (
-    // <Tabs
-    //   screenOptions={{
-    //     tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-    //     headerShown: false,
-    //     tabBarButton: HapticTab,
-    //     tabBarBackground: TabBarBackground,
-    //     tabBarStyle: Platform.select({
-    //       ios: {
-    //         // Use a transparent background on iOS to show the blur effect
-    //         position: 'absolute',
-    //       },
-    //       default: {},
-    //     }),
-    //   }}>
-    //   <Tabs.Screen
-    //     name="index"
-    //     options={{
-    //       title: 'Home',
-    //       tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-    //     }}
-    //   />
-    //   <Tabs.Screen
-    //     name="explore"
-    //     options={{
-    //       title: 'Explore',
-    //       tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-    //     }}
-    //   />
-    // </Tabs>
     <SafeAreaView
       style={{
         flex: 1,
-        // paddingVertical: Platform.select({ ios: 0, android: 10 }),
         position: "relative",
         backgroundColor: Colors[colorScheme ?? "light"].background,
       }}
     >
       <ThemedView
         style={{
-          // paddingTop: Constants.statusBarHeight,
           paddingTop: 4,
         }}
         className="flex flex-col top-0 left-0 fixed z-50 w-full justify-evenly items-center "
       >
-        {/* <ThemedView className="flex flex-row w-full bg-red-300 h-10 gap-2">
-          <TextInput value="12" />
-        </ThemedView> */}
+        <ThemedView className="flex items-center justify-center flex-row w-full bg-red-300 h-10 gap-2 px-5">
+          <ThemedView
+            style={{
+              width: "95%",
+              backgroundColor:
+                Colors[colorScheme ?? "light"].tabIconDefault + "33",
+            }}
+            className="flex flex-row rounded-md items-center justify-center py-2 px-1 gap-2"
+          >
+            <Search
+              color={Colors[colorScheme ?? "light"].text}
+              className="flex-shrink-0 mx-2"
+              size={20}
+            />
+            <TextInput
+              // value="12"
+              placeholder="Search"
+              placeholderTextColor={Colors[colorScheme ?? "light"].text}
+              className="p-0 flex-shrink-0"
+              style={{
+                width: "95%",
+                fontSize: 14,
+                color: Colors[colorScheme ?? "light"].text,
+              }}
+            />
+          </ThemedView>
+          <MessageCircle
+            fill={Colors[colorScheme ?? "light"].text}
+            className="flex-shrink-0"
+          />
+        </ThemedView>
         <ThemedView
-          className="flex flex-row  border-b w-full  justify-evenly items-center "
+          className="flex flex-row mt-2 border-b w-full  justify-evenly items-center "
           style={{
             borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
           }}
