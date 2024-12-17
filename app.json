@@ -32,6 +32,15 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Inter-VariableFont_opsz,wght.ttf",
+            "./assets/fonts/Inter-Italic-VariableFont_opsz,wght.ttf"
+          ]
+        }
       ]
     ],
     "experiments": {
