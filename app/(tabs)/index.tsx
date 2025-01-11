@@ -11,14 +11,17 @@ import { ThemedView } from "@/components/ThemedView";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
 import {
+  Ellipsis,
   Forward,
   ImageUp,
+  Menu,
   MessageSquare,
   Send,
   ThumbsUp,
 } from "lucide-react-native";
 import { router } from "expo-router";
 import { useState } from "react";
+import { useSession } from "@/context/SessionContext";
 
 interface Post {
   username: string;
@@ -39,26 +42,35 @@ function Post({
   time,
   image,
 }: Post) {
+  const { user } = useSession();
   const colorScheme = useColorScheme();
   return (
     <ThemedView className="flex flex-col gap-4 w-full h-fit my-2">
-      <ThemedView className="flex flex-row px-4 justify-between">
-        <ThemedView className="flex flex-row gap-4 items-center">
+      <ThemedView className="flex flex-row px-4 justify-between w-full">
+        <ThemedView className="flex flex-row gap-4 items-center w-full">
           <ThemedView
             style={{ backgroundColor: Colors["light"].tint }}
             className="w-14 h-14 rounded-full"
           />
-          <ThemedView className="flex flex-col justify-center">
-            <ThemedText className="font-bold">{username}</ThemedText>
-            <ThemedText
-              className="font-extralight "
-              style={{
-                color: Colors[colorScheme ?? "light"].text + "80",
-                fontSize: 12,
-              }}
-            >
-              {time}
-            </ThemedText>
+          <ThemedView
+            className="flex flex-row justify-between items-center w-min"
+            style={{ flex: 1 }}
+          >
+            <ThemedView className="flex flex-col justify-center">
+              <ThemedText className="font-bold w-min">{username}</ThemedText>
+              <ThemedText
+                className="font-extralight w-min"
+                style={{
+                  color: Colors[colorScheme ?? "light"].text + "80",
+                  fontSize: 12,
+                }}
+              >
+                {time}
+              </ThemedText>
+            </ThemedView>
+            <TouchableOpacity activeOpacity={0.8} className="p-3">
+              <Ellipsis color={Colors[colorScheme ?? "light"].text} />
+            </TouchableOpacity>
           </ThemedView>
         </ThemedView>
       </ThemedView>
@@ -136,6 +148,7 @@ export default function HomeScreen() {
   // INITIALIZATIONS
   const [newPostCaption, setNewPostCaption] = useState<string>();
   const colorScheme = useColorScheme();
+  const { user } = useSession();
   const [posts, setPosts] = useState([
     {
       username: "Abdullah Ijaz",
@@ -188,76 +201,51 @@ export default function HomeScreen() {
         })}
       </ScrollView>
       <ScrollView className="flex flex-col h-full w-full py-4">
-        <ThemedView
-          style={{
-            borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "33",
-            flex: 1,
-          }}
-          className="border-b  flex-row gap-4 justify-between px-4 pb-4 mb-2"
-        >
+        {user && user.loggedin === "admin" && (
           <ThemedView
-            className="rounded-full max-w-12 h-12 "
             style={{
+              borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "33",
               flex: 1,
-              backgroundColor: Colors["light"].tint,
             }}
-          />
-
-          <ThemedView
-            style={{
-              backgroundColor:
-                Colors[colorScheme ?? "light"].tabIconDefault + "33",
-              // width: "70%",
-              flex: newPostCaption ? 2 : 3,
-            }}
-            className="flex flex-row rounded-md h-min px-3 gap-2"
+            className="border-b  flex-row gap-4 justify-between px-4 pb-4 mb-2"
           >
-            <TextInput
-              // value="12"
-              value={newPostCaption}
-              onChangeText={(value) => {
-                setNewPostCaption(value);
-              }}
-              placeholder="Add a post"
-              placeholderTextColor={Colors[colorScheme ?? "light"].text + "80"}
-              className="p-0 "
+            <ThemedView
+              className="rounded-full max-w-12 h-12 "
               style={{
-                width: "100%",
-                flex: newPostCaption ? 2 : 4,
-                fontSize: 14,
-                color: Colors[colorScheme ?? "light"].text,
+                flex: 1,
+                backgroundColor: Colors["light"].tint,
               }}
             />
-          </ThemedView>
-          <ThemedView
-            className="rounded-full max-w-12 h-12  flex items-center justify-center"
-            style={{
-              flex: 1,
-              backgroundColor:
-                Colors[colorScheme ?? "light"].tabIconDefault + "33",
-            }}
-          >
-            <ImageUp
-              color={Colors[colorScheme ?? "light"].text}
-              className=""
-              size={24}
-            />
-          </ThemedView>
 
-          {newPostCaption && (
-            <TouchableOpacity
-              onPress={() => {
-                const newPost: Post = {
-                  caption: newPostCaption,
-                  image: "https://dummyimage.com/hd1080",
-                  likes: 0,
-                  comments: 0,
-                  shares: 0,
-                  username: "Abdullah Ijaz",
-                  time: "now",
-                };
-                addPost(newPost);
+            <ThemedView
+              style={{
+                backgroundColor:
+                  Colors[colorScheme ?? "light"].tabIconDefault + "33",
+                // width: "70%",
+                flex: newPostCaption ? 2 : 3,
               }}
+              className="flex flex-row rounded-md h-min px-3 gap-2"
+            >
+              <TextInput
+                // value="12"
+                value={newPostCaption}
+                onChangeText={(value) => {
+                  setNewPostCaption(value);
+                }}
+                placeholder="Add a post"
+                placeholderTextColor={
+                  Colors[colorScheme ?? "light"].text + "80"
+                }
+                className="p-0 "
+                style={{
+                  width: "100%",
+                  flex: newPostCaption ? 2 : 4,
+                  fontSize: 14,
+                  color: Colors[colorScheme ?? "light"].text,
+                }}
+              />
+            </ThemedView>
+            <ThemedView
               className="rounded-full max-w-12 h-12  flex items-center justify-center"
               style={{
                 flex: 1,
@@ -265,15 +253,43 @@ export default function HomeScreen() {
                   Colors[colorScheme ?? "light"].tabIconDefault + "33",
               }}
             >
-              <Send
+              <ImageUp
                 color={Colors[colorScheme ?? "light"].text}
                 className=""
                 size={24}
               />
-            </TouchableOpacity>
-          )}
-        </ThemedView>
+            </ThemedView>
 
+            {newPostCaption && (
+              <TouchableOpacity
+                onPress={() => {
+                  const newPost: Post = {
+                    caption: newPostCaption,
+                    image: "https://dummyimage.com/hd1080",
+                    likes: 0,
+                    comments: 0,
+                    shares: 0,
+                    username: "Abdullah Ijaz",
+                    time: "now",
+                  };
+                  addPost(newPost);
+                }}
+                className="rounded-full max-w-12 h-12  flex items-center justify-center"
+                style={{
+                  flex: 1,
+                  backgroundColor:
+                    Colors[colorScheme ?? "light"].tabIconDefault + "33",
+                }}
+              >
+                <Send
+                  color={Colors[colorScheme ?? "light"].text}
+                  className=""
+                  size={24}
+                />
+              </TouchableOpacity>
+            )}
+          </ThemedView>
+        )}
         <ThemedView
           className="flex flex-col h-full w-full gap-8 mb-40"
           style={{

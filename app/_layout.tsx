@@ -26,6 +26,7 @@ import {
   Inter_900Black,
 } from "@expo-google-fonts/inter";
 import "../global.css"; // Prevent the splash screen from auto-hiding before asset loading is complete.
+import { SessionProvider } from "@/context/SessionContext";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -51,17 +52,20 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-  console.log("test");
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <SessionProvider>
+      <SafeAreaProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </SessionProvider>
   );
 }

@@ -13,17 +13,20 @@ import {
   Alert,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
-import { adminLogin } from "@/functions/auth";
+import { useSession } from "@/context/SessionContext";
 
 const ACCOUNT_TYPES = [
-  { label: "Admin", value: "admin" },
-  { label: "User", value: "user" },
-  { label: "Manager", value: "manager" },
+  { label: "DSA", value: "dsa" },
+  { label: "Sports Coach", value: "sportscoach" },
+  { label: "Coord", value: "coordinator" },
+  { label: "Student Rep", value: "studentrep" },
 ];
 
 export default function LoginPage() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const { signIn } = useSession();
+  const [error, setError] = useState<string>("");
 
   const form = useForm({
     defaultValues: {
@@ -34,20 +37,17 @@ export default function LoginPage() {
     onSubmit: async ({ value }) => {
       // Do something with form data
       // console.log(value);
-      switch (value["account_type"]) {
-        case "admin":
-          adminLogin(value["email"], value["password"])
-            .then((d) => {
-              console.log(d);
-              router.replace("/");
-            })
-            .catch((err) => {
-              Alert.alert("Error", err);
-            });
-          break;
-        default:
-          Alert.alert("Error", "Not Implemented");
-      }
+      signIn(
+        { email: value["email"], password: value["password"] },
+        value["account_type"],
+      )
+        .then(() => {
+          router.replace("/");
+        })
+        .catch((e) => {
+          console.log(e);
+          setError(e);
+        });
     },
   });
 
@@ -75,7 +75,9 @@ export default function LoginPage() {
         <ThemedText className="text-center font-black mb-4" type="subtitle">
           Login
         </ThemedText>
-
+        <ThemedText style={{ color: "#ff3333" }} className="mb-1">
+          {error && error}
+        </ThemedText>
         {/* Email Field */}
         <form.Field
           name="email"

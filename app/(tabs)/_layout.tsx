@@ -1,27 +1,42 @@
-import React from "react";
-import { Platform, StatusBar, TextInput, TouchableOpacity } from "react-native";
-import { HapticTab } from "@/components/HapticTab";
-import { IconSymbol } from "@/components/ui/IconSymbol";
+import React, { useCallback } from "react";
+import { TouchableOpacity, ActivityIndicator } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ThemedView } from "@/components/ThemedView";
-import { Slot, usePathname, useRouter } from "expo-router";
+import { Slot, useFocusEffect, usePathname, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 
-import Constants from "expo-constants";
 import {
   Home,
   LogIn,
   MessageCircle,
-  Search,
+  User,
   UsersRound,
 } from "lucide-react-native";
+import { useSession } from "@/context/SessionContext";
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
   const router = useRouter();
-  console.log(pathname);
+  const { user, isLoading } = useSession();
+
+  useFocusEffect(
+    useCallback(() => {
+      // Logic to run whenever this page is focused
+      console.log("Page is focused");
+      console.log("User:", user, "Loading:", isLoading);
+
+      // You can also trigger any side effects or actions here
+      // like fetching data, resetting state, etc.
+
+      return () => {
+        // Optional cleanup logic when the page loses focus
+        console.log("Page is no longer focused");
+      };
+    }, [user, isLoading]), // Dependencies to re-run the effect
+  );
   const btns = [
     {
       name: "/",
@@ -29,23 +44,19 @@ export default function TabLayout() {
     },
 
     {
-      name: "/explore",
-      icon: UsersRound,
-    },
-
-    {
-      name: "index",
-      icon: Home,
-    },
-    {
-      name: "index",
-      icon: Home,
-    },
-    {
-      name: "login",
-      icon: LogIn,
+      name: user ? "/account" : "/login",
+      icon: user ? User : LogIn,
     },
   ];
+
+  if (isLoading) {
+    return (
+      <ThemedView className="flex flex-col justify-center items-center w-full h-full">
+        <ActivityIndicator size={"large"} />
+      </ThemedView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={{
@@ -69,10 +80,6 @@ export default function TabLayout() {
           >
             CampusPlay
           </ThemedText>
-          <MessageCircle
-            fill={Colors[colorScheme ?? "light"].text}
-            className="flex-shrink-0"
-          />
         </ThemedView>
         <ThemedView
           className="flex flex-row mt-2 border-b w-full  justify-evenly items-center "
@@ -86,10 +93,10 @@ export default function TabLayout() {
                 activeOpacity={0.8}
                 onPress={() => {
                   // console.log(item);
-                  router.push(item.name);
+                  router.push(`${item.name}`);
                 }}
                 key={index}
-                className="flex w-min flex-col gap-2 justify-center items-center pt-2 duration-150"
+                className="flex w-1/2 flex-col gap-2 justify-center items-center pt-2 duration-150"
               >
                 <item.icon
                   size={24}
@@ -100,7 +107,7 @@ export default function TabLayout() {
                   }
                 />
                 <ThemedView
-                  className="h-0.5 w-[50px] rounded-t"
+                  className="h-0.5 w-3/4 rounded-t"
                   style={{
                     backgroundColor:
                       pathname === item.name
