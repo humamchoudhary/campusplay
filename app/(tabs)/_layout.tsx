@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { TouchableOpacity, ActivityIndicator } from "react-native";
+import { TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { ThemedView } from "@/components/ThemedView";
@@ -56,6 +56,18 @@ export default function TabLayout() {
       </ThemedView>
     );
   }
+
+  const paths = [
+    { name: "Matches", path: "/matches", color: "red", bg: "#FF000080" },
+    { name: "History", path: "/history", color: "pink", bg: "#D0637CB3" },
+    {
+      name: "Top Performers",
+      path: "/topperformers",
+      color: "pink",
+      bg: "#D0637CB3",
+    },
+    { name: "Rules", path: "/rules", color: "pink", bg: "#D0637CB3" },
+  ];
 
   return (
     <SafeAreaView
@@ -119,7 +131,32 @@ export default function TabLayout() {
             );
           })}
         </ThemedView>
+        <ScrollView
+          horizontal={true}
+          className="flex flex-row  py-2 px-4 w-full h-fit border-b "
+          style={{
+            borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+          }}
+          contentContainerStyle={{ gap: 8 }}
+        >
+          {paths.map((item, index) => {
+            return (
+              <TouchableOpacity
+                key={index}
+                activeOpacity={0.7}
+                onPress={() => {
+                  router.push(item.path);
+                }}
+                className="px-4 py-2 rounded-full h-fit"
+                style={{ backgroundColor: item.bg }}
+              >
+                <ThemedText>{item.name}</ThemedText>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </ThemedView>
+
       <Slot />
     </SafeAreaView>
   );

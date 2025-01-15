@@ -17,9 +17,10 @@ import { useSession } from "@/context/SessionContext";
 
 const ACCOUNT_TYPES = [
   { label: "DSA", value: "dsa" },
-  { label: "Sports Coach", value: "sportscoach" },
-  { label: "Coord", value: "coordinator" },
-  { label: "Student Rep", value: "studentrep" },
+  { label: "Sports Coach", value: "coach" },
+  { label: "Coordinator", value: "coordinator" },
+  { label: "Student Rep", value: "rep" },
+  { label: "Referee", value: "ref" },
 ];
 
 export default function LoginPage() {

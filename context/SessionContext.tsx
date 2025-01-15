@@ -45,10 +45,37 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
         });
 
         const data = await response.json();
+        // console.log(data.user);
         setUser(data.user);
       }
     } catch (error) {
       console.error("Error loading session:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const change_password = async (cur_pass: string, new_pass: string) => {
+    try {
+      setIsLoading(true);
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/${user?.loggedin}/changepassword`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(loginData),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        await AsyncStorage.setItem(SESSION_KEY, data.token);
+
+        await loadStoredSession();
+      } else {
+        throw new Error(data.message || "Login failed"); // Provide a default error message
+      }
+    } catch (error) {
+      // console.error(error);
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -60,7 +87,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   ) => {
     try {
       setIsLoading(true);
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/${type}login`;
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/${type}/login`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

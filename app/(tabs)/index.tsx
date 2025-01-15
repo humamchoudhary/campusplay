@@ -160,17 +160,6 @@ export default function HomeScreen() {
       image: "https://dummyimage.com/hd1080",
     },
   ]);
-  const paths = [
-    { name: "Matches", path: "/matches", color: "red", bg: "#FF000080" },
-    { name: "History", path: "/history", color: "pink", bg: "#D0637CB3" },
-    {
-      name: "Top Performers",
-      path: "/topperformers",
-      color: "pink",
-      bg: "#D0637CB3",
-    },
-    { name: "Rules", path: "/rules", color: "pink", bg: "#D0637CB3" },
-  ];
 
   // FUNCTIONS
   function addPost(newpost: Post) {
@@ -183,30 +172,6 @@ export default function HomeScreen() {
   // RENDERS
   return (
     <ThemedView className="flex flex-col w-full h-full">
-      <ScrollView
-        horizontal={true}
-        className="flex flex-row  py-2 px-4 w-full h-fit border-b "
-        style={{
-          borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
-        }}
-        contentContainerStyle={{ gap: 8 }}
-      >
-        {paths.map((item, index) => {
-          return (
-            <TouchableOpacity
-              key={index}
-              activeOpacity={0.7}
-              onPress={() => {
-                router.push(item.path);
-              }}
-              className="px-4 py-2 rounded-full h-fit"
-              style={{ backgroundColor: item.bg }}
-            >
-              <ThemedText>{item.name}</ThemedText>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
       <ScrollView className="flex flex-col h-full w-full py-4">
         {user && user.loggedin === "admin" && (
           <ThemedView
