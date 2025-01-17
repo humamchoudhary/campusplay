@@ -60,12 +60,7 @@ export default function TabLayout() {
   const paths = [
     { name: "Matches", path: "/matches", color: "red", bg: "#FF000080" },
     { name: "History", path: "/history", color: "pink", bg: "#D0637CB3" },
-    {
-      name: "Top Performers",
-      path: "/topperformers",
-      color: "pink",
-      bg: "#D0637CB3",
-    },
+    { name: "Top Performers",path: "/topperformers",color: "pink",bg: "#D0637CB3"},
     { name: "Rules", path: "/rules", color: "pink", bg: "#D0637CB3" },
   ];
 
