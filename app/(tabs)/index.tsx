@@ -284,6 +284,8 @@ function Post({
   );
 }
 
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
 import Modal from "react-native-modal";
 import { useForm } from "@tanstack/react-form";
 export default function HomeScreen() {
@@ -302,6 +304,36 @@ export default function HomeScreen() {
       image: "https://dummyimage.com/hd1080",
     },
   ]);
+
+  const pickImage = async () => {
+    // Ask for permissions
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Pick the image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      base64: false, // We’ll convert to bytes manually
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+
+      // Read the file as bytes
+      const fileBytes = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Store the byte string
+      // setByteString(fileBytes);
+      return fileBytes;
+    }
+  };
 
   // FUNCTIONS
   function addPost(newpost: Post) {

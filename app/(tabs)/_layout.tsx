@@ -44,11 +44,13 @@ export default function TabLayout() {
     },
 
     {
-      name: user ? "/account" : "/login",
+      name: user ? `/${user.loggedin}/account` : "/login",
       icon: user ? User : LogIn,
     },
   ];
 
+  console.log(user?.loggedin);
+  console.log(pathname);
   if (isLoading) {
     return (
       <ThemedView className="flex flex-col justify-center items-center w-full h-full">
@@ -60,7 +62,12 @@ export default function TabLayout() {
   const paths = [
     { name: "Matches", path: "/matches", color: "red", bg: "#FF000080" },
     { name: "History", path: "/history", color: "pink", bg: "#D0637CB3" },
-    { name: "Top Performers",path: "/topperformers",color: "pink",bg: "#D0637CB3"},
+    {
+      name: "Top Performers",
+      path: "/topperformers",
+      color: "pink",
+      bg: "#D0637CB3",
+    },
     { name: "Rules", path: "/rules", color: "pink", bg: "#D0637CB3" },
   ];
 
