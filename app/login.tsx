@@ -16,7 +16,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useSession } from "@/context/SessionContext";
 
 const ACCOUNT_TYPES = [
-  { label: "DSA", value: "dsa" },
+  { label: "Admin", value: "admin" },
   { label: "Sports Coach", value: "coach" },
   { label: "Coordinator", value: "coordinator" },
   { label: "Student Rep", value: "rep" },
