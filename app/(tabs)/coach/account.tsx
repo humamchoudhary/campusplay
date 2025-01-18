@@ -1,10 +1,11 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useSession } from "@/context/SessionContext";
-import React, { useState } from "react";
+import { Dropdown } from "react-native-element-dropdown";
+import React, { useState, useEffect } from "react";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { TextInput, TouchableOpacity, View, StyleSheet, } from "react-native";
 import { router } from "expo-router";
 import Modal from "react-native-modal";
 import { useForm } from "@tanstack/react-form";
@@ -12,14 +13,63 @@ import { useForm } from "@tanstack/react-form";
 export default function Account() {
   const colorScheme = useColorScheme();
   const { user, isLoading, signOut } = useSession();
-  const [addCoach, setAddCoach] = useState<boolean>(false);
+  const [addCoordinator, setAddCoordinator] = useState<boolean>(false);
   const [changePasswordModal, setChangePasswordModal] = useState(false);
+  const [selectDepartment, setSelectedDepartment] = useState("");
+  const [addReferee, setAddReferee] = useState<boolean>(false);
+  const [selectSport, setSelectedSport] = useState("");
+  const [updateRulesModal, setUpdateRulesModal] = useState<boolean>(false);
+const [selectedSportRules, setSelectedSportRules] = useState<string>("");
+const [selectedSportTitle, setSelectedSportTitle] = useState<string>("");
+const [rules, setRules] = useState<{ [key in 'Football' | 'Cricket' | 'Basketball' | 'TableTennis']: string }>({
+  Football: "",
+  Cricket: "",
+  Basketball: "",
+  TableTennis: ""
+});
+
+useEffect(() => {
+  fetchRules();
+}, []);
+
+// Add function to fetch rules
+const fetchRules = async () => {
+  try {
+    const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rules`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.success) {
+      setRules(data.rules);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+  const department = [
+    { label: "CS", value: "CS" },
+    { label: "AVE", value: "AVE" },
+    { label: "EE", value: "EE" },
+    { label: "ME", value: "ME" },
+    { label: "SS", value: "SS" },
+    { label: "ATH", value: "ATH" },
+  ];
+
+  const sport = [
+    { label: "Football", value: "Football" },
+    { label: "Cricket", value: "Cricket" },
+    { label: "Basketball", value: "Basketball" },
+    { label: "TableTennis", value: "TableTennis" },
+    
+  ];
 
   const change_password_form = useForm({
     defaultValues: {
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
+      
     },
     onSubmit: async ({ value }) => {
       try {
@@ -46,6 +96,25 @@ export default function Account() {
     },
   });
 
+  {sport.map((sportItem) => (
+    <TouchableOpacity
+      key={sportItem.value}
+      onPress={() => {
+        setSelectedSportTitle(sportItem.value);
+        setSelectedSportRules(rules[sportItem.value]);
+        setUpdateRulesModal(true);
+      }}
+      className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    >
+      <ThemedText
+        className="text-center"
+        style={{ color: Colors[colorScheme ?? "light"].background }}
+      >
+        {sportItem.value} Rules
+      </ThemedText>
+    </TouchableOpacity>
+  ))}
   // const change_pass_form = useForm({
   //   defaultValues: {
   //     current_password: "",
@@ -81,6 +150,40 @@ export default function Account() {
   //   },
   // });
 
+  const referee_form = useForm({
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/referee/create`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: value["email"],
+            password: value["password"],
+            username: value["username"],
+            department: selectDepartment,
+          }),
+        });
+  
+        const data = await response.json();
+  
+        if (data.success) {
+          setAddReferee(false);
+          return;
+        } else {
+          throw "Creation failed";
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
+
   const a_c_form = useForm({
     defaultValues: {
       username: "",
@@ -104,7 +207,7 @@ export default function Account() {
         const data = await response.json();
 
         if (data.success) {
-          setAddCoach(false);
+          setAddCoordinator(false);
           return;
         } else {
           throw "Login failed";
@@ -137,7 +240,7 @@ export default function Account() {
         <ThemedView className="flex flex-col gap-4 mt-10">
           <TouchableOpacity
             onPress={() => {
-              setAddCoach(true);
+              setAddCoordinator(true);
             }}
             className="flex w-64 rounded-md items-center justify-center py-3"
             style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
@@ -146,7 +249,22 @@ export default function Account() {
               className="text-center"
               style={{ color: Colors[colorScheme ?? "light"].background }}
             >
-              Add New Coach
+              Add Coordinator
+            </ThemedText>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            onPress={() => {
+              setAddReferee(true);
+            }}
+            className="flex w-64 rounded-md items-center justify-center py-3"
+            style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+          >
+            <ThemedText
+              className="text-center"
+              style={{ color: Colors[colorScheme ?? "light"].background }}
+            >
+              Add Referee
             </ThemedText>
           </TouchableOpacity>
 
@@ -177,9 +295,83 @@ export default function Account() {
           </TouchableOpacity>
         </ThemedView>
 
-        {/* <|============= Add Coach Modal =============|> */}
+        <ThemedView className="flex flex-col items-center" style={{ flex: 1 }}>
+  <ThemedText
+    style={{
+      fontWeight: 700,
+      fontSize: 24,
+      color: Colors[colorScheme ?? "light"].tint,
+    }}
+    className="mt-8"
+  >
+    Sports Category Rules 
+  </ThemedText>
+
+  {/* Add these buttons */}
+  <TouchableOpacity
+    onPress={() => {
+      setUpdateRulesModal(true);
+    }}
+    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+  >
+    <ThemedText
+      className="text-center"
+      style={{ color: Colors[colorScheme ?? "light"].background }}
+    >
+       Football Rules
+    </ThemedText>
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    onPress={() => {
+      setUpdateRulesModal(true);
+    }}
+    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+  >
+    <ThemedText
+      className="text-center"
+      style={{ color: Colors[colorScheme ?? "light"].background }}
+    >
+       Cricket Rules
+    </ThemedText>
+  </TouchableOpacity>
+  <TouchableOpacity
+    onPress={() => {
+      setUpdateRulesModal(true);
+    }}
+    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+  >
+    <ThemedText
+      className="text-center"
+      style={{ color: Colors[colorScheme ?? "light"].background }}
+    >
+       Basketball Rules
+    </ThemedText>
+  </TouchableOpacity>
+  <TouchableOpacity
+    onPress={() => {
+      setUpdateRulesModal(true);
+    }}
+    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+  >
+    <ThemedText
+      className="text-center"
+      style={{ color: Colors[colorScheme ?? "light"].background }}
+    >
+       TableTennis Rules
+    </ThemedText>
+  </TouchableOpacity>
+  
+</ThemedView>
+        
+
+        {/* <|============= Add Coordinator Modal =============|> */}
         <Modal
-          isVisible={addCoach}
+          isVisible={addCoordinator}
           // transparent
         >
           <ThemedView
@@ -195,7 +387,7 @@ export default function Account() {
               style={{ fontWeight: 700, fontSize: 24 }}
               className="mb-2"
             >
-              Add New Coach
+              Add New Coordinator
             </ThemedText>
 
             <a_c_form.Field
@@ -225,7 +417,7 @@ export default function Account() {
                     )}
                   <TextInput
                     className="border rounded-md w-full "
-                    placeholder="Coach Name"
+                    placeholder="Coordinator Name"
                     placeholderTextColor={
                       Colors[colorScheme ?? "light"].tabIconDefault
                     }
@@ -362,6 +554,42 @@ export default function Account() {
                 </ThemedView>
               )}
             </a_c_form.Field>
+        
+        <Dropdown
+            data={department}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Department"
+            value={selectDepartment}
+            onChange={(item) => setSelectedDepartment(item.value)}
+            style={[
+                styles.dropdown,
+                {
+                borderColor:
+                    Colors[colorScheme ?? "light"].tabIconDefault + "80",
+                },
+            ]}
+            placeholderStyle={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+            }}
+            selectedTextStyle={{
+                color: Colors[colorScheme ?? "light"].text,
+            }}
+            itemTextStyle={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+            }}
+            activeColor={
+                Colors[colorScheme ?? "light"].tabIconDefault + "30"
+            }
+            containerStyle={{
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+                borderRadius: 8,
+                borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+                overflow: "hidden",
+            }}
+            />
+
+
 
             <TouchableOpacity
               onPress={() => {
@@ -380,7 +608,262 @@ export default function Account() {
 
             <TouchableOpacity
               onPress={() => {
-                setAddCoach(false);
+                setAddCoordinator(false);
+              }}
+              className="flex w-4/5 rounded-md items-center justify-center py-3"
+              style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+            >
+              <ThemedText
+                className="text-center"
+                style={{ color: Colors[colorScheme ?? "light"].background }}
+              >
+                Cancel
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        </Modal>
+
+        {/* <|============= Add refree Modal =============|> */}
+
+        <Modal
+          isVisible={addReferee}
+          // transparent
+        >
+          <ThemedView
+            style={{
+              backgroundColor: Colors[colorScheme ?? "light"].background,
+              borderColor: Colors[colorScheme ?? "light"].tint,
+              borderWidth: 1,
+              width: "100%",
+            }}
+            className="flex flex-col rounded-md px-4 py-8 items-center gap-4 "
+          >
+            <ThemedText
+              style={{ fontWeight: 700, fontSize: 24 }}
+              className="mb-2"
+            >
+              Add New Refree
+            </ThemedText>
+
+            <a_c_form.Field
+              name="username"
+              validators={{
+                onSubmitAsync: ({ value }) => {
+                  return !value ? "Name is required" : undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <ThemedView className="w-4/5">
+                  {field.state.meta.errors &&
+                    field.state.meta.errors.length > 0 && (
+                      <ThemedText
+                        className="text-start w-full"
+                        style={{
+                          color: "#ff3333",
+                          fontWeight: "900",
+                          fontSize: 12,
+                          lineHeight: 12,
+                          marginBottom: 5,
+                        }}
+                      >
+                        {field.state.meta.errors.join(", ")}
+                      </ThemedText>
+                    )}
+                  <TextInput
+                    className="border rounded-md w-full "
+                    placeholder="Refree Name"
+                    placeholderTextColor={
+                      Colors[colorScheme ?? "light"].tabIconDefault
+                    }
+                    value={field.state.value}
+                    onChangeText={field.handleChange}
+                    style={{
+                      borderColor:
+                        field.state.meta.errors &&
+                        field.state.meta.errors.length
+                          ? "#F33"
+                          : Colors[colorScheme ?? "light"].tabIconDefault +
+                            "80",
+                      color:
+                        field.state.meta.errors &&
+                        field.state.meta.errors.length
+                          ? "#F33"
+                          : Colors[colorScheme ?? "light"].text,
+                      paddingHorizontal: 10,
+                      // paddingHorizontal: 10,
+                      paddingVertical: 15,
+                    }}
+                  />
+                </ThemedView>
+              )}
+            </a_c_form.Field>
+
+            <a_c_form.Field
+              name="email"
+              validators={{
+                onSubmitAsync: ({ value }) => {
+                  return !value
+                    ? "Email is required"
+                    : !value.includes("@")
+                      ? "Invalid email a_c_format"
+                      : undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <ThemedView className="w-4/5">
+                  {field.state.meta.errors &&
+                    field.state.meta.errors.length > 0 && (
+                      <ThemedText
+                        className="text-start w-full"
+                        style={{
+                          color: "#ff3333",
+                          fontWeight: "900",
+                          fontSize: 12,
+                          lineHeight: 12,
+                          marginBottom: 5,
+                        }}
+                      >
+                        {field.state.meta.errors.join(", ")}
+                      </ThemedText>
+                    )}
+                  <TextInput
+                    className="border rounded-md w-full "
+                    placeholder="Email"
+                    placeholderTextColor={
+                      Colors[colorScheme ?? "light"].tabIconDefault
+                    }
+                    value={field.state.value}
+                    onChangeText={field.handleChange}
+                    keyboardType="email-address"
+                    style={{
+                      borderColor:
+                        field.state.meta.errors &&
+                        field.state.meta.errors.length
+                          ? "#F33"
+                          : Colors[colorScheme ?? "light"].tabIconDefault +
+                            "80",
+                      color:
+                        field.state.meta.errors &&
+                        field.state.meta.errors.length
+                          ? "#F33"
+                          : Colors[colorScheme ?? "light"].text,
+                      padding: 15,
+                    }}
+                  />
+                </ThemedView>
+              )}
+            </a_c_form.Field>
+
+            <a_c_form.Field
+              name="password"
+              validators={{
+                onSubmitAsync: ({ value }) => {
+                  return !value ? "Password is required" : undefined;
+                },
+              }}
+            >
+              {(field) => (
+                <ThemedView className="w-4/5">
+                  {field.state.meta.errors &&
+                    field.state.meta.errors.length > 0 && (
+                      <ThemedText
+                        className="text-start w-full"
+                        style={{
+                          color: "#ff3333",
+                          fontWeight: "900",
+                          fontSize: 12,
+                          lineHeight: 12,
+                          marginBottom: 5,
+                        }}
+                      >
+                        {field.state.meta.errors.join(", ")}
+                      </ThemedText>
+                    )}
+                  <TextInput
+                    className="border rounded-md w-full "
+                    placeholder="Password"
+                    placeholderTextColor={
+                      Colors[colorScheme ?? "light"].tabIconDefault
+                    }
+                    value={field.state.value}
+                    onChangeText={field.handleChange}
+                    secureTextEntry={true}
+                    style={{
+                      borderColor:
+                        field.state.meta.errors &&
+                        field.state.meta.errors.length
+                          ? "#F33"
+                          : Colors[colorScheme ?? "light"].tabIconDefault +
+                            "80",
+                      color:
+                        field.state.meta.errors &&
+                        field.state.meta.errors.length
+                          ? "#F33"
+                          : Colors[colorScheme ?? "light"].text,
+                      paddingHorizontal: 10,
+                      paddingVertical: 15,
+                    }}
+                  />
+                </ThemedView>
+              )}
+            </a_c_form.Field>
+        
+        <Dropdown
+            data={sport}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Sport"
+            value={selectSport}
+            onChange={(item) => setSelectedSport(item.value)}
+            style={[
+                styles.dropdown,
+                {
+                borderColor:
+                    Colors[colorScheme ?? "light"].tabIconDefault + "80",
+                },
+            ]}
+            placeholderStyle={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+            }}
+            selectedTextStyle={{
+                color: Colors[colorScheme ?? "light"].text,
+            }}
+            itemTextStyle={{
+                color: Colors[colorScheme ?? "light"].tabIconDefault,
+            }}
+            activeColor={
+                Colors[colorScheme ?? "light"].tabIconDefault + "30"
+            }
+            containerStyle={{
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+                borderRadius: 8,
+                borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+                overflow: "hidden",
+            }}
+            />
+
+
+
+            <TouchableOpacity
+              onPress={() => {
+                a_c_form.handleSubmit();
+              }}
+              className="flex w-4/5 rounded-md items-center justify-center py-3"
+              style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+            >
+              <ThemedText
+                className="text-center"
+                style={{ color: Colors[colorScheme ?? "light"].background }}
+              >
+                Submit
+              </ThemedText>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => {
+                setAddReferee(false);
               }}
               className="flex w-4/5 rounded-md items-center justify-center py-3"
               style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
@@ -399,7 +882,7 @@ export default function Account() {
 
         <Modal
           isVisible={changePasswordModal} // State to control visibility
-        >
+         >
           <ThemedView
             style={{
               backgroundColor: Colors[colorScheme ?? "light"].background,
@@ -514,58 +997,7 @@ export default function Account() {
               )}
             </a_c_form.Field>
 
-            {/* Confirm Password Field */}
-            <a_c_form.Field
-              name="confirmPassword"
-              validators={{
-                onSubmitAsync: ({ value, fields }) => {
-                  return !value
-                    ? "Confirmation password is required"
-                    : value !== fields.newPassword.state.value
-                      ? "Passwords do not match"
-                      : undefined;
-                },
-              }}
-            >
-              {(field) => (
-                <ThemedView className="w-4/5">
-                  {field.state.meta.errors?.length > 0 && (
-                    <ThemedText
-                      className="text-start w-full"
-                      style={{
-                        color: "#ff3333",
-                        fontWeight: "900",
-                        fontSize: 12,
-                        lineHeight: 12,
-                        marginBottom: 5,
-                      }}
-                    >
-                      {field.state.meta.errors.join(", ")}
-                    </ThemedText>
-                  )}
-                  <TextInput
-                    className="border rounded-md w-full"
-                    placeholder="Confirm Password"
-                    placeholderTextColor={
-                      Colors[colorScheme ?? "light"].tabIconDefault
-                    }
-                    value={field.state.value}
-                    onChangeText={field.handleChange}
-                    secureTextEntry={true}
-                    style={{
-                      borderColor: field.state.meta.errors?.length
-                        ? "#F33"
-                        : Colors[colorScheme ?? "light"].tabIconDefault + "80",
-                      color: field.state.meta.errors?.length
-                        ? "#F33"
-                        : Colors[colorScheme ?? "light"].text,
-                      paddingHorizontal: 10,
-                      paddingVertical: 15,
-                    }}
-                  />
-                </ThemedView>
-              )}
-            </a_c_form.Field>
+            
 
             {/* Submit Button */}
             <TouchableOpacity
@@ -600,7 +1032,125 @@ export default function Account() {
             </TouchableOpacity>
           </ThemedView>
         </Modal>
+
+{/* Rules Update Modal */}
+<Modal
+  isVisible={updateRulesModal}
+>
+  <ThemedView
+    style={{
+      backgroundColor: Colors[colorScheme ?? "light"].background,
+      borderColor: Colors[colorScheme ?? "light"].tint,
+      borderWidth: 1,
+      width: "100%",
+    }}
+    className="flex flex-col rounded-md px-4 py-8 items-center gap-4"
+  >
+    <ThemedText
+      style={{ fontWeight: 700, fontSize: 24 }}
+      className="mb-2"
+    >
+      {selectedSportTitle} Rules
+    </ThemedText>
+
+    <TextInput
+      className="border rounded-md w-4/5"
+      placeholder="Enter updated rules"
+      placeholderTextColor={Colors[colorScheme ?? "light"].tabIconDefault}
+      multiline={true}
+      numberOfLines={6}
+      value={selectedSportRules}
+      onChangeText={setSelectedSportRules}
+      style={{
+        borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+        color: Colors[colorScheme ?? "light"].text,
+        padding: 15,
+        textAlignVertical: 'top'
+      }}
+    />
+
+    <ThemedText
+      style={{
+        fontSize: 12,
+        color: Colors[colorScheme ?? "light"].tabIconDefault,
+      }}
+      className="w-4/5 text-left"
+    >
+      Last updated by: {user.username} on {new Date().toLocaleString()}
+    </ThemedText>
+
+    <TouchableOpacity
+      onPress={async () => {
+        try {
+          const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rules/update`;
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              sport: selectedSportTitle,
+              rules: selectedSportRules
+            }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            // Update local rules state
+            setRules(prev => ({
+              ...prev,
+              [selectedSportTitle]: selectedSportRules
+            }));
+            setUpdateRulesModal(false);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }}
+      className="flex w-4/5 rounded-md items-center justify-center py-3"
+      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    >
+      <ThemedText
+        className="text-center"
+        style={{ color: Colors[colorScheme ?? "light"].background }}
+      >
+        Update Rules
+      </ThemedText>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      onPress={() => {
+        setUpdateRulesModal(false);
+      }}
+      className="flex w-4/5 rounded-md items-center justify-center py-3"
+      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    >
+      <ThemedText
+        className="text-center"
+        style={{ color: Colors[colorScheme ?? "light"].background }}
+      >
+        Close
+      </ThemedText>
+    </TouchableOpacity>
+  </ThemedView>
+</Modal>
+
       </ThemedView>
+
+      
+
+
     );
+    
   }
 }
+const styles = StyleSheet.create({
+  dropdown: {
+    width: "80%",
+    borderWidth: 1,
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 10,
+    marginTop: 5,
+    justifyContent: "center",
+    textAlign: "center"
+  },
+});
