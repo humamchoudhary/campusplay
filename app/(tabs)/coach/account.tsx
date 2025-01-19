@@ -17,36 +17,7 @@ export default function Account() {
   const [changePasswordModal, setChangePasswordModal] = useState(false);
   const [selectDepartment, setSelectedDepartment] = useState("");
   const [addReferee, setAddReferee] = useState<boolean>(false);
-  const [selectSport, setSelectedSport] = useState("");
-  const [updateRulesModal, setUpdateRulesModal] = useState<boolean>(false);
-const [selectedSportRules, setSelectedSportRules] = useState<string>("");
-const [selectedSportTitle, setSelectedSportTitle] = useState<string>("");
-const [rules, setRules] = useState<{ [key in 'Football' | 'Cricket' | 'Basketball' | 'TableTennis']: string }>({
-  Football: "",
-  Cricket: "",
-  Basketball: "",
-  TableTennis: ""
-});
-
-useEffect(() => {
-  fetchRules();
-}, []);
-
-// Add function to fetch rules
-const fetchRules = async () => {
-  try {
-    const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rules`;
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.success) {
-      setRules(data.rules);
-    }
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-
+  const [selectedSport, setSelectedSport] = useState<string>("");
 
   const department = [
     { label: "CS", value: "CS" },
@@ -96,25 +67,7 @@ const fetchRules = async () => {
     },
   });
 
-  {sport.map((sportItem) => (
-    <TouchableOpacity
-      key={sportItem.value}
-      onPress={() => {
-        setSelectedSportTitle(sportItem.value);
-        setSelectedSportRules(rules[sportItem.value]);
-        setUpdateRulesModal(true);
-      }}
-      className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
-      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
-    >
-      <ThemedText
-        className="text-center"
-        style={{ color: Colors[colorScheme ?? "light"].background }}
-      >
-        {sportItem.value} Rules
-      </ThemedText>
-    </TouchableOpacity>
-  ))}
+
   // const change_pass_form = useForm({
   //   defaultValues: {
   //     current_password: "",
@@ -225,6 +178,22 @@ const fetchRules = async () => {
     router.replace("/");
   }
   if (user && !isLoading) {
+    function setUpdateRulesModal(arg0: boolean) {
+      throw new Error("Function not implemented.");
+    }
+
+    function setRules(arg0: (prev: any) => any) {
+      throw new Error("Function not implemented.");
+    }
+
+    function setIsEditing(arg0: boolean) {
+      throw new Error("Function not implemented.");
+    }
+
+    function setNewRule(text: string): void {
+      throw new Error("Function not implemented.");
+    }
+
     return (
       <ThemedView className="flex flex-col items-center" style={{ flex: 1 }}>
         <ThemedText
@@ -309,62 +278,68 @@ const fetchRules = async () => {
 
   {/* Add these buttons */}
   <TouchableOpacity
-    onPress={() => {
-      setUpdateRulesModal(true);
-    }}
-    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
-    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+  onPress={() => {
+    setSelectedSport("Football");
+    setUpdateRulesModal(true);
+  }}
+  className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+  style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+>
+  <ThemedText
+    className="text-center"
+    style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    <ThemedText
-      className="text-center"
-      style={{ color: Colors[colorScheme ?? "light"].background }}
-    >
-       Football Rules
-    </ThemedText>
-  </TouchableOpacity>
+    Football Rules
+  </ThemedText>
+</TouchableOpacity>
 
-  <TouchableOpacity
-    onPress={() => {
-      setUpdateRulesModal(true);
-    }}
-    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
-    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+<TouchableOpacity
+  onPress={() => {
+    setSelectedSport("Football");
+    setUpdateRulesModal(true);
+  }}
+  className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+  style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+>
+  <ThemedText
+    className="text-center"
+    style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    <ThemedText
-      className="text-center"
-      style={{ color: Colors[colorScheme ?? "light"].background }}
-    >
-       Cricket Rules
-    </ThemedText>
-  </TouchableOpacity>
-  <TouchableOpacity
-    onPress={() => {
-      setUpdateRulesModal(true);
-    }}
-    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
-    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    Football Rules
+  </ThemedText>
+</TouchableOpacity>
+
+<TouchableOpacity
+  onPress={() => {
+    setSelectedSport("Football");
+    setUpdateRulesModal(true);
+  }}
+  className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+  style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+>
+  <ThemedText
+    className="text-center"
+    style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    <ThemedText
-      className="text-center"
-      style={{ color: Colors[colorScheme ?? "light"].background }}
-    >
-       Basketball Rules
-    </ThemedText>
-  </TouchableOpacity>
-  <TouchableOpacity
-    onPress={() => {
-      setUpdateRulesModal(true);
-    }}
-    className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
-    style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    Football Rules
+  </ThemedText>
+</TouchableOpacity>
+
+<TouchableOpacity
+  onPress={() => {
+    setSelectedSport("Football");
+    setUpdateRulesModal(true);
+  }}
+  className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
+  style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+>
+  <ThemedText
+    className="text-center"
+    style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    <ThemedText
-      className="text-center"
-      style={{ color: Colors[colorScheme ?? "light"].background }}
-    >
-       TableTennis Rules
-    </ThemedText>
-  </TouchableOpacity>
+    Football Rules
+  </ThemedText>
+</TouchableOpacity>
   
 </ThemedView>
         
@@ -815,7 +790,7 @@ const fetchRules = async () => {
             labelField="label"
             valueField="value"
             placeholder="Select Sport"
-            value={selectSport}
+            value={selectedSport}
             onChange={(item) => setSelectedSport(item.value)}
             style={[
                 styles.dropdown,
@@ -1033,105 +1008,8 @@ const fetchRules = async () => {
           </ThemedView>
         </Modal>
 
-{/* Rules Update Modal */}
-<Modal
-  isVisible={updateRulesModal}
->
-  <ThemedView
-    style={{
-      backgroundColor: Colors[colorScheme ?? "light"].background,
-      borderColor: Colors[colorScheme ?? "light"].tint,
-      borderWidth: 1,
-      width: "100%",
-    }}
-    className="flex flex-col rounded-md px-4 py-8 items-center gap-4"
-  >
-    <ThemedText
-      style={{ fontWeight: 700, fontSize: 24 }}
-      className="mb-2"
-    >
-      {selectedSportTitle} Rules
-    </ThemedText>
-
-    <TextInput
-      className="border rounded-md w-4/5"
-      placeholder="Enter updated rules"
-      placeholderTextColor={Colors[colorScheme ?? "light"].tabIconDefault}
-      multiline={true}
-      numberOfLines={6}
-      value={selectedSportRules}
-      onChangeText={setSelectedSportRules}
-      style={{
-        borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
-        color: Colors[colorScheme ?? "light"].text,
-        padding: 15,
-        textAlignVertical: 'top'
-      }}
-    />
-
-    <ThemedText
-      style={{
-        fontSize: 12,
-        color: Colors[colorScheme ?? "light"].tabIconDefault,
-      }}
-      className="w-4/5 text-left"
-    >
-      Last updated by: {user.username} on {new Date().toLocaleString()}
-    </ThemedText>
-
-    <TouchableOpacity
-      onPress={async () => {
-        try {
-          const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rules/update`;
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              sport: selectedSportTitle,
-              rules: selectedSportRules
-            }),
-          });
-
-          const data = await response.json();
-          if (data.success) {
-            // Update local rules state
-            setRules(prev => ({
-              ...prev,
-              [selectedSportTitle]: selectedSportRules
-            }));
-            setUpdateRulesModal(false);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }}
-      className="flex w-4/5 rounded-md items-center justify-center py-3"
-      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
-    >
-      <ThemedText
-        className="text-center"
-        style={{ color: Colors[colorScheme ?? "light"].background }}
-      >
-        Update Rules
-      </ThemedText>
-    </TouchableOpacity>
-
-    <TouchableOpacity
-      onPress={() => {
-        setUpdateRulesModal(false);
-      }}
-      className="flex w-4/5 rounded-md items-center justify-center py-3"
-      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
-    >
-      <ThemedText
-        className="text-center"
-        style={{ color: Colors[colorScheme ?? "light"].background }}
-      >
-        Close
-      </ThemedText>
-    </TouchableOpacity>
-  </ThemedView>
-</Modal>
+        {/* Rules Update Modal */}
+       
 
       </ThemedView>
 
