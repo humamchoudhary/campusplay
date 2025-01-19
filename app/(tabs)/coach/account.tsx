@@ -5,7 +5,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import React, { useState, useEffect } from "react";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Colors } from "@/constants/Colors";
-import { TextInput, TouchableOpacity, View, StyleSheet, } from "react-native";
+import { TextInput, TouchableOpacity, View, StyleSheet, ScrollView, } from "react-native";
 import { router } from "expo-router";
 import Modal from "react-native-modal";
 import { useForm } from "@tanstack/react-form";
@@ -17,17 +17,34 @@ export default function Account() {
   const [changePasswordModal, setChangePasswordModal] = useState(false);
   const [selectDepartment, setSelectedDepartment] = useState("");
   const [addReferee, setAddReferee] = useState<boolean>(false);
-  const [selectedSport, setSelectedSport] = useState<string>("");
+  const [selectedSport, setSelectedSport] = useState<keyof typeof gameRules>("Football");
+  const [createPool, setcreatePool] = useState<boolean>(false);
 
-  const department = [
-    { label: "CS", value: "CS" },
-    { label: "AVE", value: "AVE" },
-    { label: "EE", value: "EE" },
-    { label: "ME", value: "ME" },
-    { label: "SS", value: "SS" },
-    { label: "ATH", value: "ATH" },
-  ];
 
+
+
+  const gameRules = {
+    Football: "Rules for Football: Play fair and respect the referee.",
+    Cricket: "Rules for Cricket: Bat within the crease and bowl legally.",
+    Basketball: "Rules for Basketball: Dribble while moving and no fouls.",
+    "Table Tennis": "Rules for Table Tennis: Serve diagonally and no double bounce.",
+  };
+  const [updateRulesModal, setUpdateRulesModal] = useState(false);
+  const [rules, setRules] = useState(gameRules);
+  const [newRule, setNewRule] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+
+
+
+  
+    const department = [
+      { label: "CS", value: "CS" },
+      { label: "AVE", value: "AVE" },
+      { label: "EE", value: "EE" },
+      { label: "ME", value: "ME" },
+      { label: "SS", value: "SS" },
+      { label: "ATH", value: "ATH" },
+    ];
   const sport = [
     { label: "Football", value: "Football" },
     { label: "Cricket", value: "Cricket" },
@@ -178,24 +195,10 @@ export default function Account() {
     router.replace("/");
   }
   if (user && !isLoading) {
-    function setUpdateRulesModal(arg0: boolean) {
-      throw new Error("Function not implemented.");
-    }
-
-    function setRules(arg0: (prev: any) => any) {
-      throw new Error("Function not implemented.");
-    }
-
-    function setIsEditing(arg0: boolean) {
-      throw new Error("Function not implemented.");
-    }
-
-    function setNewRule(text: string): void {
-      throw new Error("Function not implemented.");
-    }
 
     return (
       <ThemedView className="flex flex-col items-center" style={{ flex: 1 }}>
+        <ScrollView>
         <ThemedText
           style={{
             fontWeight: 700,
@@ -238,6 +241,21 @@ export default function Account() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => {
+              setcreatePool(true);
+            }}
+            className="flex w-64 rounded-md items-center justify-center py-3"
+            style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+          >
+            <ThemedText
+              className="text-center"
+              style={{ color: Colors[colorScheme ?? "light"].background }}
+            >
+              Create Pool
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={() => setChangePasswordModal(true)}
             className="flex w-64 rounded-md items-center justify-center py-3"
             style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
@@ -271,7 +289,7 @@ export default function Account() {
       fontSize: 24,
       color: Colors[colorScheme ?? "light"].tint,
     }}
-    className="mt-8"
+    className="mt-8 mb-8"
   >
     Sports Category Rules 
   </ThemedText>
@@ -295,7 +313,7 @@ export default function Account() {
 
 <TouchableOpacity
   onPress={() => {
-    setSelectedSport("Football");
+    setSelectedSport("Cricket");
     setUpdateRulesModal(true);
   }}
   className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
@@ -305,13 +323,13 @@ export default function Account() {
     className="text-center"
     style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    Football Rules
+    Cricket Rules
   </ThemedText>
 </TouchableOpacity>
 
 <TouchableOpacity
   onPress={() => {
-    setSelectedSport("Football");
+    setSelectedSport("Basketball");
     setUpdateRulesModal(true);
   }}
   className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
@@ -321,13 +339,13 @@ export default function Account() {
     className="text-center"
     style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    Football Rules
+    Basketball Rules
   </ThemedText>
 </TouchableOpacity>
 
 <TouchableOpacity
   onPress={() => {
-    setSelectedSport("Football");
+    setSelectedSport("Table Tennis");
     setUpdateRulesModal(true);
   }}
   className="flex w-64 rounded-md items-center justify-center py-3 mt-4"
@@ -337,7 +355,7 @@ export default function Account() {
     className="text-center"
     style={{ color: Colors[colorScheme ?? "light"].background }}
   >
-    Football Rules
+    TableTennis Rules
   </ThemedText>
 </TouchableOpacity>
   
@@ -1009,7 +1027,108 @@ export default function Account() {
         </Modal>
 
         {/* Rules Update Modal */}
-       
+
+<Modal
+  isVisible={updateRulesModal}
+>
+  <ThemedView
+    style={{
+      backgroundColor: Colors[colorScheme ?? "light"].background,
+      borderColor: Colors[colorScheme ?? "light"].tint,
+      borderWidth: 1,
+      width: "100%",
+    }}
+    className="flex flex-col rounded-md px-4 py-8 items-center gap-4"
+  >
+    <ThemedText
+      style={{ fontWeight: 700, fontSize: 24 }}
+      className="mb-2"
+    >
+      {selectedSport} Rules
+    </ThemedText>
+
+    {/* Current Rules Display */}
+    <ThemedView className="w-4/5">
+      <ThemedText
+        style={{
+          color: Colors[colorScheme ?? "light"].text,
+          marginBottom: 10,
+        }}
+      >
+        Current Rules:
+      </ThemedText>
+      <ThemedText
+        style={{
+          color: Colors[colorScheme ?? "light"].text,
+          marginBottom: 20,
+        }}
+      >
+        {rules[selectedSport]}
+      </ThemedText>
+    </ThemedView>
+
+    {/* Rules Input */}
+    <ThemedView className="w-4/5">
+      <TextInput
+        className="border rounded-md w-full"
+        placeholder="Enter new rules"
+        placeholderTextColor={Colors[colorScheme ?? "light"].tabIconDefault}
+        value={newRule}
+        onChangeText={setNewRule}
+        multiline={true}
+        numberOfLines={4}
+        style={{
+          borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+          color: Colors[colorScheme ?? "light"].text,
+          paddingHorizontal: 10,
+          paddingVertical: 15,
+          textAlignVertical: 'top',
+        }}
+      />
+    </ThemedView>
+
+    {/* Update Button */}
+    <TouchableOpacity
+      onPress={() => {
+        if (newRule.trim()) {
+          setRules(prev => ({
+            ...prev,
+            [selectedSport]: newRule
+          }));
+          setNewRule("");
+          setUpdateRulesModal(false);
+        }
+      }}
+      className="flex w-4/5 rounded-md items-center justify-center py-3"
+      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    >
+      <ThemedText
+        className="text-center"
+        style={{ color: Colors[colorScheme ?? "light"].background }}
+      >
+        Update Rules
+      </ThemedText>
+    </TouchableOpacity>
+
+    {/* Cancel Button */}
+    <TouchableOpacity
+      onPress={() => {
+        setNewRule("");
+        setUpdateRulesModal(false);
+      }}
+      className="flex w-4/5 rounded-md items-center justify-center py-3"
+      style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
+    >
+      <ThemedText
+        className="text-center"
+        style={{ color: Colors[colorScheme ?? "light"].background }}
+      >
+        Cancel
+      </ThemedText>
+    </TouchableOpacity>
+  </ThemedView>
+</Modal>
+        </ScrollView>
 
       </ThemedView>
 
