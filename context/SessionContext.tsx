@@ -88,6 +88,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/${type}/login`;
+      console.log(url);
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
