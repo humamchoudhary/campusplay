@@ -15,6 +15,7 @@ export default function Account() {
   const { user, isLoading, signOut } = useSession();
   const [addStudentRep, setAddStudentRep] = useState<boolean>(false);
   const [changePasswordModal, setChangePasswordModal] = useState(false);
+  const [selectDepartment, setSelectedDepartment] = useState("");
 
 
 
@@ -111,10 +112,11 @@ export default function Account() {
       username: "",
       email: "",
       password: "",
+      department: "",
     },
     onSubmit: async ({ value }) => {
       try {
-        const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/coordinator/create`;
+        const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/create`;
         console.log(url);
         const response = await fetch(url, {
           method: "POST",
@@ -123,6 +125,7 @@ export default function Account() {
             email: value["email"],
             password: value["password"],
             username: value["username"],
+            department: selectDepartment,
           }),
         });
 
@@ -142,6 +145,7 @@ export default function Account() {
       // onSubmit(value);
     },
   });
+
 
   if (!isLoading && !user) {
     router.replace("/");
@@ -393,6 +397,39 @@ export default function Account() {
                 </ThemedView>
               )}
             </a_c_form.Field>
+            <Dropdown
+              data={department}
+              labelField="label"
+              valueField="value"
+              placeholder="Select Department"
+              value={selectDepartment}
+              onChange={(item) => setSelectedDepartment(item.value)}
+              style={[
+                  styles.dropdown,
+                  {
+                  borderColor:
+                      Colors[colorScheme ?? "light"].tabIconDefault + "80",
+                  },
+              ]}
+              placeholderStyle={{
+                  color: Colors[colorScheme ?? "light"].tabIconDefault,
+              }}
+              selectedTextStyle={{
+                  color: Colors[colorScheme ?? "light"].text,
+              }}
+              itemTextStyle={{
+                  color: Colors[colorScheme ?? "light"].tabIconDefault,
+              }}
+              activeColor={
+                  Colors[colorScheme ?? "light"].tabIconDefault + "30"
+              }
+              containerStyle={{
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
+                  borderRadius: 8,
+                  borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+                  overflow: "hidden",
+              }}
+              />
         
             <TouchableOpacity
               onPress={() => {

@@ -158,6 +158,7 @@ export default function Account() {
       username: "",
       email: "",
       password: "",
+      department: "",
     },
     onSubmit: async ({ value }) => {
       try {
@@ -170,6 +171,7 @@ export default function Account() {
             email: value["email"],
             password: value["password"],
             username: value["username"],
+            department: selectDepartment,
           }),
         });
 
