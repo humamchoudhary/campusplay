@@ -150,7 +150,7 @@ export default function Account() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              router.push("/rep/trials");
+              router.push("/rep/trial");
             }}
             className="flex w-64 rounded-md items-center justify-center py-3"
             style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}

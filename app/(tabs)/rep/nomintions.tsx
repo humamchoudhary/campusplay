@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { useForm } from "@tanstack/react-form";
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 interface PlayerData {
   name: string;
@@ -50,6 +52,35 @@ export default function Nominations() {
     { label: "SS", value: "SS" },
     { label: "ATH", value: "ATH" },
   ];
+
+
+  const downloadPDF = async (sport: string) => {
+    try {
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/downloadPDF/${sport}`;
+      const response = await fetch(url);
+      const blob = await response.blob();
+      
+      // Handle file saving based on platform
+      if (Platform.OS === 'web') {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${sport}_Nomination_Form.pdf`;
+        link.click();
+      } else {
+        const fileUri = `${FileSystem.documentDirectory}${sport}_Nomination_Form.pdf`;
+        await FileSystem.writeAsStringAsync(fileUri, await blob.text(), {
+          encoding: FileSystem.EncodingType.Base64
+        });
+
+        await Sharing.shareAsync(fileUri);
+      }
+      
+      Alert.alert("Download", `${sport} Nomination Form downloaded successfully`);
+    } catch (error) {
+      console.log("Error downloading PDF:", error);
+      Alert.alert("Download Failed", "Could not download the PDF.");
+    }
+  };
 
   const handlePlayerChange = (index: number, field: keyof PlayerData, value: string) => {
     const newPlayers = [...players];
@@ -106,7 +137,7 @@ export default function Nominations() {
 
   const handleSubmit = async () => {
     try {
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/nominations/submit`;
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/submitNominationForm`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -143,13 +174,13 @@ export default function Nominations() {
         {!showNominationForm ? (
           <ThemedView className="w-[60%] flex flex-col gap-4 mt-10">
             {sports.map((sport) => (
+              <View key={sport.value} className="flex flex-row items-center justify-between">
               <TouchableOpacity
-                key={sport.value}
                 onPress={() => {
                   setSelectedSport(sport.value);
                   setShowNominationForm(true);
                 }}
-                className="flex rounded-md items-center justify-center py-3"
+                className="flex-1 rounded-md items-center justify-center py-3 mr-2"
                 style={{ backgroundColor: Colors[colorScheme ?? "light"].tint }}
               >
                 <ThemedText
@@ -159,6 +190,22 @@ export default function Nominations() {
                   {sport.label}
                 </ThemedText>
               </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => downloadPDF(sport.value)}
+                className="rounded-md items-center justify-center py-3 px-2"
+                style={{ backgroundColor: Colors[colorScheme ?? "light"].background, borderWidth: 1, borderColor: Colors[colorScheme ?? "light"].tint }}
+              >
+                <ThemedText
+                  style={{ 
+                    color: Colors[colorScheme ?? "light"].tint,
+                    fontSize: 12
+                  }}
+                >
+                  Download
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+              
             ))}
           </ThemedView>
         ) : (

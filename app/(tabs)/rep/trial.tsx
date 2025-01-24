@@ -45,8 +45,8 @@ export default function Trials() {
 
   const fetchTrials = async () => {
     try {
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/trials/list`;
-      const response = await fetch(url);
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/listtrial`;
+      const response = await fetch(url,{method: "GET"});
       const data = await response.json();
       if (data.success) {
         setTrialEvents(data.trials);
@@ -62,7 +62,7 @@ export default function Trials() {
 
   const createTrial = async () => {
     try {
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/trials/create`;
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/createtrial`;
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -86,7 +86,7 @@ export default function Trials() {
 
   const deleteTrial = async (trialId: string) => {
     try {
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/trials/delete/${trialId}`;
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/deletetrial/${trialId}`;
       const response = await fetch(url, {
         method: "DELETE",
       });
@@ -102,9 +102,9 @@ export default function Trials() {
 
   const markTrialConducted = async (trialId: string) => {
     try {
-      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/trials/mark-conducted/${trialId}`;
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/rep/completedtrial/${trialId}`;
       const response = await fetch(url, {
-        method: "PUT",
+        method: "GET",
       });
 
       const data = await response.json();
