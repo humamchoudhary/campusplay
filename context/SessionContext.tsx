@@ -7,6 +7,7 @@ type User = {
   email: string;
   id: string;
   loggedin: string;
+  token: string;
 };
 
 type SessionContextType = {
@@ -46,7 +47,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
 
         const data = await response.json();
         // console.log(data.user);
-        setUser(data.user);
+        setUser({ ...data.user, token: sessionToken });
       }
     } catch (error) {
       console.error("Error loading session:", error);
