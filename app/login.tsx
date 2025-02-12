@@ -21,6 +21,7 @@ const ACCOUNT_TYPES = [
   { label: "Coordinator", value: "coordinator" },
   { label: "Student Rep", value: "rep" },
   { label: "Referee", value: "ref" },
+  { label: "Captain", value: "captain" },
 ];
 
 export default function LoginPage() {
