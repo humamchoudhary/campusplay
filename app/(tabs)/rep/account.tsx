@@ -91,7 +91,7 @@ export default function Account() {
             email: value["email"],
             password: value["password"],
             username: value["username"],
-            department: selectDepartment,
+            department: value["department"],
           }),
         });
 
@@ -394,38 +394,31 @@ export default function Account() {
               )}
             </a_c_form.Field>
             <Dropdown
-              data={department}
-              labelField="label"
-              valueField="value"
-              placeholder="Select Department"
-              value={selectDepartment}
-              onChange={(item) => setSelectedDepartment(item.value)}
-              style={[
-                  styles.dropdown,
-                  {
-                  borderColor:
-                      Colors[colorScheme ?? "light"].tabIconDefault + "80",
-                  },
-              ]}
-              placeholderStyle={{
-                  color: Colors[colorScheme ?? "light"].tabIconDefault,
-              }}
-              selectedTextStyle={{
-                  color: Colors[colorScheme ?? "light"].text,
-              }}
-              itemTextStyle={{
-                  color: Colors[colorScheme ?? "light"].tabIconDefault,
-              }}
-              activeColor={
-                  Colors[colorScheme ?? "light"].tabIconDefault + "30"
-              }
-              containerStyle={{
-                  backgroundColor: Colors[colorScheme ?? "light"].background,
-                  borderRadius: 8,
-                  borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
-                  overflow: "hidden",
-              }}
-              />
+            data={department}
+            labelField="label"
+            valueField="value"
+            placeholder="Select Department"
+            value={a_c_form.getFieldValue("department")} // <-- Get value from form state
+            
+            onChange={(item) => a_c_form.setFieldValue("department", item.value)} // <-- Set value in form state
+           
+            style={[styles.dropdown, { borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80" }]}
+           
+            placeholderStyle={{ color: Colors[colorScheme ?? "light"].tabIconDefault }}
+           
+            selectedTextStyle={{ color: Colors[colorScheme ?? "light"].text }}
+
+            itemTextStyle={{ color: Colors[colorScheme ?? "light"].tabIconDefault }}
+
+            activeColor={Colors[colorScheme ?? "light"].tabIconDefault + "30"}
+            
+            containerStyle={{
+              backgroundColor: Colors[colorScheme ?? "light"].background,
+              borderRadius: 8,
+              borderColor: Colors[colorScheme ?? "light"].tabIconDefault + "80",
+              overflow: "hidden",
+            }}
+          />
         
             <TouchableOpacity
               onPress={() => {
