@@ -77,7 +77,7 @@ export default function LoginPage() {
           Login
         </ThemedText>
         <ThemedText style={{ color: "#ff3333" }} className="mb-1">
-          {error && error}
+          {error && `${error}`}
         </ThemedText>
         {/* Email Field */}
         <form.Field

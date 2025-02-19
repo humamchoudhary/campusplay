@@ -21,9 +21,10 @@ import {
   ThumbsUp,
 } from "lucide-react-native";
 
+import moment from "moment";
 import { Menu as SMenu, Provider, Divider } from "react-native-paper";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "@/context/SessionContext";
 
 interface Post {
@@ -32,8 +33,10 @@ interface Post {
   likes: number;
   comments: number;
   shares: number;
-  time: string;
+  time: number;
   image: string;
+  id: string;
+  updatePosts: Function | null;
 }
 
 function Post({
@@ -44,6 +47,8 @@ function Post({
   shares,
   time,
   image,
+  updatePosts,
+  id,
 }: Post) {
   const { user } = useSession();
   const colorScheme = useColorScheme();
@@ -51,7 +56,6 @@ function Post({
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
   const { height, width } = Dimensions.get("window");
-
   const [editModal, setEditModal] = useState(false);
   const handleEdit = () => {
     closeMenu();
@@ -59,13 +63,73 @@ function Post({
     setEditModal(true);
     // Add your edit logic here
   };
+
+  const pickImage = async () => {
+    // Ask for permissions
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Pick the image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      base64: true, // We’ll convert to bytes manually
+      quality: 0.5,
+    });
+    // console.log(result);
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      //
+      // // Read the file as bytes
+      const fileBytes = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      // setPostImage(fileBytes);
+      return fileBytes;
+    }
+  };
+
   const edit_form = useForm({
     defaultValues: {
       caption: caption,
       image: image,
     },
+    onSubmit: async ({ value }) => {
+      try {
+        const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/admin/post/${id}`;
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({
+            caption: value["caption"],
+            image: `data:image/png;base64,${value.image.replace("data:image/png;base64,", "")}`,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // setChangePasswordModal(false);
+          // console.log(data.);
+          updatePosts();
+        } else {
+          throw "Password change failed";
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
   });
 
+  // console.log(edit_form.state.isDirty);
   const handleDelete = () => {
     closeMenu();
     console.log("Delete clicked");
@@ -93,7 +157,7 @@ function Post({
                     fontSize: 12,
                   }}
                 >
-                  {time}
+                  {moment.unix(time).fromNow()}
                 </ThemedText>
               </ThemedView>
               {user && user.loggedin === "admin" ? (
@@ -253,7 +317,13 @@ function Post({
             }}
           >
             {(field) => (
-              <TouchableOpacity activeOpacity={0.9}>
+              <TouchableOpacity
+                onPress={async () => {
+                  const imageData = await pickImage();
+                  field.handleChange(imageData);
+                }}
+                activeOpacity={0.9}
+              >
                 <Image
                   src={image}
                   resizeMode="contain"
@@ -267,6 +337,21 @@ function Post({
               </TouchableOpacity>
             )}
           </edit_form.Field>
+
+          <TouchableOpacity
+            onPress={() => {
+              edit_form.handleSubmit();
+              setEditModal(false);
+            }}
+            // disabled={edit_form.state.isDirty}
+            activeOpacity={0.8}
+            className="rounded-md w-full py-4 items-center"
+            style={{
+              backgroundColor: Colors[colorScheme ?? "light"].tint,
+            }}
+          >
+            <ThemedText>Confirm</ThemedText>
+          </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => {
@@ -300,11 +385,50 @@ export default function HomeScreen() {
       likes: 10,
       comments: 4,
       shares: 3,
-      time: "1 day",
+      time: 0,
       image: "https://dummyimage.com/hd1080",
     },
   ]);
+  const [postImage, setPostImage] = useState<string>();
 
+  async function getPosts() {
+    try {
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/feed/getposts`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // console.log(data.posts);
+        setPosts(
+          data.posts.map((item, index) => {
+            // console.log(item._id);
+            return {
+              image: item.postImage,
+              time: item.postedAt,
+              ...item.postData,
+              username: item.adminpostusername,
+              id: item._id,
+            };
+          }),
+        );
+        // console.log(data.posts.length);
+      } else {
+        throw "Password change failed";
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  useEffect(() => {
+    getPosts();
+  }, []);
   const pickImage = async () => {
     // Ask for permissions
     const permissionResult =
@@ -318,27 +442,62 @@ export default function HomeScreen() {
     // Pick the image
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      base64: false, // We’ll convert to bytes manually
+      base64: true, // We’ll convert to bytes manually
+      quality: 0.5,
     });
+    // console.log(result);
 
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-
-      // Read the file as bytes
+      //
+      // // Read the file as bytes
       const fileBytes = await FileSystem.readAsStringAsync(uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-
-      // Store the byte string
-      // setByteString(fileBytes);
+      setPostImage(fileBytes);
       return fileBytes;
     }
   };
 
   // FUNCTIONS
-  function addPost(newpost: Post) {
+  async function addPost(newpost: Post) {
     // console.log(post.caption);
-    setPosts((prev) => [newpost, ...prev]);
+
+    try {
+      const url = `${process.env.EXPO_PUBLIC_BACKEND_URL}/admin/post`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify({
+          postData: { caption: newpost.caption },
+          postImage: `data:image/png;base64,${postImage}`,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // setChangePasswordModal(false);
+        // console.log(data.);
+        setPosts((prev) => [
+          {
+            image: data.post.postImage,
+            time: data.post.postedAt,
+            ...data.post.postData,
+            username: data.post.adminpostusername,
+            id: data.post._id,
+          },
+          ...prev,
+        ]);
+      } else {
+        throw "Password change failed";
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // FUNCTION FLOWS
@@ -391,32 +550,59 @@ export default function HomeScreen() {
                 }}
               />
             </ThemedView>
-            <ThemedView
-              className="rounded-full max-w-12 h-12  flex items-center justify-center"
-              style={{
-                flex: 1,
-                backgroundColor:
-                  Colors[colorScheme ?? "light"].tabIconDefault + "33",
-              }}
-            >
-              <ImageUp
-                color={Colors[colorScheme ?? "light"].text}
-                className=""
-                size={24}
-              />
-            </ThemedView>
-
+            {postImage ? (
+              <TouchableOpacity
+                className="max-w-12 h-12  flex items-center justify-center"
+                style={{
+                  flex: 1,
+                  backgroundColor:
+                    Colors[colorScheme ?? "light"].tabIconDefault + "33",
+                }}
+                onPress={() => {
+                  pickImage();
+                }}
+              >
+                {/* <ImageUp
+                  color={Colors[colorScheme ?? "light"].text}
+                  className=""
+                  size={24}
+                /> */}
+                <Image
+                  source={{ uri: `data:image/png;base64,${postImage}` }}
+                  className="w-full h-full"
+                />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                className="rounded-full max-w-12 h-12  flex items-center justify-center"
+                style={{
+                  flex: 1,
+                  backgroundColor:
+                    Colors[colorScheme ?? "light"].tabIconDefault + "33",
+                }}
+                onPress={() => {
+                  pickImage();
+                }}
+              >
+                <ImageUp
+                  color={Colors[colorScheme ?? "light"].text}
+                  className=""
+                  size={24}
+                />
+              </TouchableOpacity>
+            )}
             {newPostCaption && (
               <TouchableOpacity
                 onPress={() => {
                   const newPost: Post = {
                     caption: newPostCaption,
-                    image: "https://dummyimage.com/hd1080",
+                    image: `data:image/png;base64,${postImage}`,
                     likes: 0,
                     comments: 0,
                     shares: 0,
                     username: "Abdullah Ijaz",
-                    time: "now",
+                    time: Math.floor(Date.now() / 1000),
+                    id: "",
                   };
                   addPost(newPost);
                 }}
@@ -442,9 +628,10 @@ export default function HomeScreen() {
             flex: 1,
           }}
         >
-          {posts.map((item, index) => (
-            <Post key={index} {...item} />
-          ))}
+          {posts.map((item, index) => {
+            // console.log(item);
+            return <Post key={index} {...item} updatePosts={getPosts} />;
+          })}
         </ThemedView>
       </ScrollView>
     </ThemedView>
